@@ -16,9 +16,9 @@ We are grateful for any help in making Exercism better!
 This guide covers several common scenarios pertaining to **improving the language tracks**
 themselves. There are other guides about contributing to other parts of the Exercism ecosystem.
 
-* [The Command-Line Client](https://github.com/exercism/cli/blob/master/README.md)
-* [The Website](https://github.com/exercism/exercism.io/blob/master/CONTRIBUTING.md)
-* [The Exercises API](https://github.com/exercism/x-api/blob/master/CONTRIBUTING.md) (used by both the command-line client and the website)
+* [The Command-Line Client](https://github.com/exercism/cli/blob/main/README.md)
+* [The Website](https://github.com/exercism/website/blob/main/CONTRIBUTING.md)
+* [The Exercises API](https://github.com/exercism/x-api/blob/main/CONTRIBUTING.md) (used by both the command-line client and the website)
 
 ## Table of Contents
 
@@ -33,7 +33,6 @@ themselves. There are other guides about contributing to other parts of the Exer
     * [Beta-Testing a Language Track](#beta-testing-a-language-track)
 * [Useful Tidbits](#useful-tidbits)
     * [Pull Request Guidelines](#pull-request-guidelines)
-    * [Exercise Versioning](#exercise-versioning)
     * [Anatomy of an Exercise](#anatomy-of-an-exercise)
     * [Track configuration file (config.json)](#track-configuration-file)
     * [Track-Level Linting With Configlet](#track-level-linting-with-configlet)
@@ -147,14 +146,11 @@ If you're unsure where to make the change, ask us, and we'll help you figure it 
 
 Once you've updated the test suite, there are a few things you'll want to check.
 
-- Make sure the [reference solution](#reference-solution) is still passing.
-- If the exercise is [versioned](#exercise-versioning), and the change will
-  mean that existing solutions on the site will not pass the new tests, then
-  increment the version number, both in the test and in the reference solution.
+- Make sure the reference solution is still passing.
 - Run the full, track-level test suite, if available.
   If the track has a way to automatically run all the tests against their
   reference solutions, it will be documented in the README.
-- Run [configlet](#track-level-linting-with-configlet), the track-level linter.
+- Run configlet, the track-level linter.
 
 You can also take a look at the `.travis.yml` file to see what the continuous
 integration system will do to verify the track.
@@ -187,10 +183,7 @@ needs to be made in the [exercism/problem-specifications repository](https://git
 not directly to the test suite itself.
 
 Find the JSON file for the problem in question. For example, if you want to change
-the Clock problem, then look for `exercises/clock/canonical-data.json`. Each 
-change should also bump the version of the test data. For more information,
-see the [test data versioning](README.md#test-data-versioning) section of the 
-README.
+the Clock problem, then look for `exercises/clock/canonical-data.json`.
 
 Submit a pull request with the change.
 
@@ -237,7 +230,7 @@ A problem must have a unique slug. This slug is used as
   Reference the PR in problem-specifications.
   It's suggested, but not required, to wait until the problem-specifications PR is merged before merging the track-specific PR, for the following reasons:
     * If changes are suggested to the problem-specifications PR, it is likely that they will be applicable to the track-specific PR as well.
-    * Only applicable if the exercise needs a custom `title` in metadata.yml (as described in https://github.com/exercism/docs/blob/master/you-can-help/make-up-new-exercises.md#problem-specification): The title of the exercise as displayed on the website will use the default algorithm instead of the correct title until the problem-specifications PR is merged.
+    * Only applicable if the exercise needs a custom `title` in metadata.yml (as described in https://github.com/exercism/docs/blob/main/you-can-help/make-up-new-exercises.md#problem-specification): The title of the exercise as displayed on the website will use the default algorithm instead of the correct title until the problem-specifications PR is merged.
     * Only applicable to tracks that have specific tools that depend on exercises being present in problem-specifications (see the track-specific documentation for whether any such tools exist): Such tools may operate unexpectedly if the exercise does not yet exist in problem-specifications. Try checking out the branch on a local copy of problem-specifications or rerunning the tool after the problem-specifications PR is merged if applicable.
 
 ## Track Anatomy
@@ -261,6 +254,8 @@ Each track should have the following structure:
 │   └── TESTS.md
 └── exercises
     └── hello-world
+        └── .meta
+        │   └── tests.toml (only if the exercise is based on canonical data)
         ├── hello-world_example.file
         ├── hello-world.file
         └── hello-world_test.file
@@ -284,7 +279,7 @@ The example template for a track can be found in the [request-new-language-track
     - `LEARNING.md` - a few notes about where people might want to go to learn the track's language from scratch. These are the the resources you need only when first getting up to speed with a language (tutorials, blog posts, etc.).
     - `RESOURCES.md` - references and other useful resources. These resources are those that would commonly be used by a developer on an ongoing basis (core language docs, api docs, etc.).
 
-* `exercises` - all exercises for the track should live in subdirectories of this directory. Each exercise should have a test file, an example file that should pass all tests, and a template file that is a stub to help the user get started with the exercise. The example file should be used for the CI build.
+* `exercises` - all exercises for the track should live in subdirectories of this directory. Each exercise should have a test file, an example file that should pass all tests, and a template file that is a stub to help the user get started with the exercise. The example file should be used for the CI build. If the exercise is based on canonical data, a `tests.toml` file should be created which contains a mapping from a canonical test case's UUID to a boolean value that indicates if the test case was implemented by the exercise
 
 ## Starting a New Track
 
@@ -320,66 +315,20 @@ scenarios in this guide.
 
 ### Pull Request Guidelines
 
-See the [pull request guidelines](https://github.com/exercism/docs/blob/master/contributing/pull-request-guidelines.md) in the docs repository.
-
-### Exercise Versioning
-
-It's only when we get a bunch of people having conversations about the
-solutions that we really discover what makes a problem interesting, and
-in what way it can be improved.
-
-Some changes to the test suites will invalidate existing solutions that people
-have submitted.
-
-We think this is totally fine, however sometimes people start leaving feedback
-saying _this doesn't pass the tests_. This is technically true, but since the
-solution passed the tests at the time it was written, it's generally more
-useful to just discuss the code as it is, rather than enforce strict
-adherence to the most recent version of the tests.
-
-Some language tracks have implemented a simple, manual versioning system to
-help avoid unnecessary discussions about failing the current test suites.
-
-If the exercise is versioned, then the test suite will probably have a
-_book-keeping_ type test at the very bottom that asserts against a value in
-the reference solution. If the change you're making is backwards-incompatible,
-then please increment the version in both the test suite and the reference
-solution.
-
-Please review the details in [README.md](https://github.com/exercism/problem-specifications#test-data-versioning) and bump the version number accordingly.
+See the [pull request guidelines](https://github.com/exercism/docs/blob/main/contributing/pull-request-guidelines.md) in the docs repository.
 
 ### Anatomy of an Exercise
 
-See the [anatomy of an exercise](https://github.com/exercism/docs/tree/master/language-tracks/exercises/anatomy) in the docs repository.
+See the [anatomy of an exercise](https://github.com/exercism/docs/tree/main/language-tracks/exercises/anatomy) in the docs repository.
 
 ### Track configuration file
 
-Each language track has a configuration file called `config.json`.
+Each language track has a configuration file called `config.json`. Its structure is defined in [this spec](https://github.com/exercism/docs/blob/main/anatomy/tracks/config-json.md). The `config.json` file's key feature is that it defines which exercises the language track has implemented.
 
-Important keys are:
-* `problems` - actively served via `exercism fetch`
-* `deprecated` - implemented, but aren't served anymore
-* `foregone` - will not be implemented in the track
-
-The `configlet` tool uses those categories to ensure that
-
-1. all the `problems` are implemented,
-2. `deprecated` problems are not actively served as problems, and
-3. `foregone` problems are not implemented.
-
-In addition, it will complain about problems that are implemented but are not
-listed in the config under the `problems` key.
-
-A problem might be foregone for a number of reasons, typically because it's a
-bad exercise for the language.
-
-Optional keys:
-* `test_pattern` - A (case sensitive) regex pattern that test filenames will match. It is used to determine which files will be visible on a problem's test-suite page on the exercism.io site. The default value used if this key is not present is `test` (note: this is case _insensitive_)
-* `ignore_pattern` - A (case insensitive) regex pattern that will cause files matching it to not be served to the student by `exercism fetch`. The default value used if this key is not present is `example`
-* `solution_pattern` - A (case sensitive) regex pattern that matches solution files in the track repository. Used by [configlet](https://github.com/exercism/configlet) to check for the presence of an example solution for each problem implemented by the track.  The default value used if this key is not present is `[Ee]xample`.
+The [configlet](https://github.com/exercism/docs/blob/main/anatomy/tracks/configlet/README.md) tool can verify (lint) a track's configuration file.
 
 ### Git Basics
-See [Git Basics](https://github.com/exercism/docs/blob/master/contributing/git-basics.md) in [docs](https://github.com/exercism/docs) repository.
+See [Git Basics](https://github.com/exercism/docs/blob/main/contributing/git-basics.md) in [docs](https://github.com/exercism/docs) repository.
 
 ### et cetera
 
@@ -391,6 +340,6 @@ TODO: add more sections:
 
 ## Improving Consistency By Extracting Shared Test Data
 
-This documentation has moved [to the docs repository](https://github.com/exercism/docs/blob/master/you-can-help/improve-exercise-metadata.md).
+This documentation has moved [to the docs repository](https://github.com/exercism/docs/blob/main/you-can-help/improve-exercise-metadata.md).
 
 We are maintaining this section, since many open issues link to it.
